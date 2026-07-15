@@ -1,0 +1,17 @@
+{
+  "name": "smart-task-manager",
+  "version": "1.0.0",
+  "description": "Smart To-Do & Task Management Application",
+  "main": "index.js",
+  "scripts": {
+    "client": "npm start --prefix client",
+    "server": "npm run dev --prefix server",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "concurrently": "^9.0.1"
+  }
+}
