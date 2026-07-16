@@ -1,13 +1,115 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Quicksand:wght@500;600;700&display=swap");
+
+:root {
+  --bg-main:
+    radial-gradient(circle at top left, #ffdff2 0%, transparent 25%),
+    radial-gradient(circle at top right, #dff7ff 0%, transparent 30%),
+    radial-gradient(circle at bottom left, #e8e3ff 0%, transparent 28%),
+    linear-gradient(135deg, #fff6fb 0%, #f7f4ff 45%, #eefbff 100%);
+
+  --bg-secondary: rgba(255, 255, 255, 0.55);
+  --text-main: #4b4453;
+  --text-soft: #7b7285;
+  --heading: #7c5cc4;
+  --card-bg: rgba(255, 255, 255, 0.72);
+  --card-strong: rgba(255, 255, 255, 0.88);
+  --border-color: rgba(203, 191, 255, 0.5);
+  --shadow: 0 10px 30px rgba(168, 150, 255, 0.16);
+
+  --pink: #ffb7d5;
+  --lavender: #cbbcff;
+  --sky: #bfe9ff;
+  --mint: #c8f7dc;
+  --peach: #ffd6b8;
+  --yellow: #fff1a8;
+
+  --button-main: linear-gradient(135deg, #cbbcff, #ffbdd8);
+  --button-text: #4a3f57;
+  --danger: linear-gradient(135deg, #ffb0c8, #ff8fb1);
+  --warning: linear-gradient(135deg, #ffe29a, #ffcba4);
+  --success: linear-gradient(135deg, #c7f7d4, #aeeed0);
+
+  --input-bg: rgba(255, 255, 255, 0.85);
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+html,
+body,
+#root {
+  min-height: 100%;
+  width: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: "Nunito", sans-serif;
+  background: var(--bg-main);
+  background-attachment: fixed;
+  color: var(--text-main);
+}
+
+#root {
+  min-height: 100vh;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: 16px;
+  padding: 11px 18px;
+  font-size: 14px;
+  font-weight: 800;
+  font-family: "Nunito", sans-serif;
+  transition: 0.25s ease;
+}
+
+button:hover {
+  transform: translateY(-2px) scale(1.01);
+  opacity: 0.96;
+}
+
+input,
+textarea,
+select {
+  width: 100%;
+  padding: 13px 14px;
+  margin-top: 6px;
+  margin-bottom: 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  font-size: 14px;
+  outline: none;
+  background: var(--input-bg);
+  color: var(--text-main);
+  font-family: "Nunito", sans-serif;
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.08);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-soft);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: #d7b8ff;
+  box-shadow: 0 0 0 4px rgba(212, 182, 255, 0.18);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 0;
+  font-family: "Quicksand", sans-serif;
+}
+
+.app-shell {
+  min-height: 100vh;
 }

@@ -1,7 +1,7 @@
 const db = require("../config/db");
 
 const createTask = (req, res) => {
-  const { title, description, status, priority, due_date } = req.body;
+  const { title, description, status, priority, due_date, project_id } = req.body;
   const userId = req.user.id;
 
   if (!title) {
@@ -12,14 +12,15 @@ const createTask = (req, res) => {
   }
 
   const query = `
-    INSERT INTO tasks (user_id, title, description, status, priority, due_date)
-    VALUES (?, ?, ?, ?, ?, ?)
+    INSERT INTO tasks (user_id, project_id, title, description, status, priority, due_date)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
   `;
 
   db.query(
     query,
     [
       userId,
+      project_id || null,
       title,
       description || "",
       status || "pending",
@@ -46,10 +47,65 @@ const createTask = (req, res) => {
 
 const getAllTasks = (req, res) => {
   const userId = req.user.id;
+  const projectId = req.query.project_id;
+  const labelId = req.query.label_id;
 
-  const query = "SELECT * FROM tasks WHERE user_id = ? ORDER BY created_at DESC";
+  let query = `
+    SELECT 
+      tasks.id,
+      tasks.user_id,
+      tasks.project_id,
+      tasks.title,
+      tasks.description,
+      tasks.status,
+      tasks.priority,
+      tasks.due_date,
+      tasks.created_at,
+      tasks.updated_at,
+      projects.name AS project_name,
+      GROUP_CONCAT(DISTINCT labels.name ORDER BY labels.name SEPARATOR ', ') AS labels,
+      GROUP_CONCAT(DISTINCT labels.id ORDER BY labels.id SEPARATOR ',') AS label_ids,
+      GROUP_CONCAT(DISTINCT labels.color ORDER BY labels.id SEPARATOR ',') AS label_colors
+    FROM tasks
+    LEFT JOIN projects ON tasks.project_id = projects.id
+    LEFT JOIN task_labels ON tasks.id = task_labels.task_id
+    LEFT JOIN labels ON task_labels.label_id = labels.id
+    WHERE tasks.user_id = ?
+  `;
 
-  db.query(query, [userId], (err, results) => {
+  const values = [userId];
+
+  if (projectId) {
+    query += ` AND tasks.project_id = ?`;
+    values.push(projectId);
+  }
+
+  if (labelId) {
+    query += ` AND tasks.id IN (
+      SELECT task_id
+      FROM task_labels
+      WHERE label_id = ?
+    )`;
+    values.push(labelId);
+  }
+
+  query += `
+    GROUP BY
+      tasks.id,
+      tasks.user_id,
+      tasks.project_id,
+      tasks.title,
+      tasks.description,
+      tasks.status,
+      tasks.priority,
+      tasks.due_date,
+      tasks.created_at,
+      tasks.updated_at,
+      projects.name
+    ORDER BY tasks.created_at DESC
+  `;
+
+  db.query(query, values, (err, results) => {
     if (err) {
       return res.status(500).json({
         success: false,
@@ -66,10 +122,13 @@ const getAllTasks = (req, res) => {
 };
 
 const getTaskById = (req, res) => {
-  const userId = req.user.id;
   const taskId = req.params.id;
+  const userId = req.user.id;
 
-  const query = "SELECT * FROM tasks WHERE id = ? AND user_id = ?";
+  const query = `
+    SELECT * FROM tasks
+    WHERE id = ? AND user_id = ?
+  `;
 
   db.query(query, [taskId, userId], (err, results) => {
     if (err) {
@@ -95,33 +154,36 @@ const getTaskById = (req, res) => {
 };
 
 const updateTask = (req, res) => {
-  const userId = req.user.id;
   const taskId = req.params.id;
-  const { title, description, status, priority, due_date } = req.body;
+  const userId = req.user.id;
+  const { title, description, status, priority, due_date, project_id } = req.body;
 
-  const findQuery = "SELECT * FROM tasks WHERE id = ? AND user_id = ?";
+  const findQuery = `
+    SELECT * FROM tasks
+    WHERE id = ? AND user_id = ?
+  `;
 
-  db.query(findQuery, [taskId, userId], (findErr, findResult) => {
+  db.query(findQuery, [taskId, userId], (findErr, findResults) => {
     if (findErr) {
       return res.status(500).json({
         success: false,
-        message: "Error checking task",
+        message: "Failed to find task",
         error: findErr.message
       });
     }
 
-    if (findResult.length === 0) {
+    if (findResults.length === 0) {
       return res.status(404).json({
         success: false,
         message: "Task not found"
       });
     }
 
-    const existingTask = findResult[0];
+    const existingTask = findResults[0];
 
     const updateQuery = `
       UPDATE tasks
-      SET title = ?, description = ?, status = ?, priority = ?, due_date = ?
+      SET title = ?, description = ?, status = ?, priority = ?, due_date = ?, project_id = ?
       WHERE id = ? AND user_id = ?
     `;
 
@@ -133,6 +195,7 @@ const updateTask = (req, res) => {
         status || existingTask.status,
         priority || existingTask.priority,
         due_date !== undefined ? due_date : existingTask.due_date,
+        project_id !== undefined ? project_id : existingTask.project_id,
         taskId,
         userId
       ],
@@ -155,10 +218,13 @@ const updateTask = (req, res) => {
 };
 
 const deleteTask = (req, res) => {
-  const userId = req.user.id;
   const taskId = req.params.id;
+  const userId = req.user.id;
 
-  const query = "DELETE FROM tasks WHERE id = ? AND user_id = ?";
+  const query = `
+    DELETE FROM tasks
+    WHERE id = ? AND user_id = ?
+  `;
 
   db.query(query, [taskId, userId], (err, result) => {
     if (err) {
