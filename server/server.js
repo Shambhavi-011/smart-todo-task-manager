@@ -27,8 +27,8 @@ app.get("/", (req, res) => {
   res.json({ message: "Smart Task Manager API is running" });
 });
 
-app.use("/api/auth", authRoutes);
-app.use("/api/tasks", taskRoutes);
+app.use("/api/auth", authroutes);
+app.use("/api/tasks", taskroutes);
 
 const PORT = process.env.PORT || 5000;
 
